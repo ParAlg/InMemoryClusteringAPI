@@ -13,9 +13,9 @@ cc_proto_library(
 )
 
 cc_library(
-    name = "clusterer",
-    srcs = ["clusterer.cc"],
-    hdrs = ["clusterer.h"],
+    name = "in-memory-clusterer-base",
+    srcs = ["in-memory-clusterer-base.cc"],
+    hdrs = ["in-memory-clusterer-base.h"],
     deps = [
         ":config_cc_proto",
         "@com_google_absl//absl/base",
@@ -40,7 +40,7 @@ cc_library(
     srcs = ["gbbs-graph.cc"],
     hdrs = ["gbbs-graph.h"],
     deps = [
-        ":clusterer",
+        ":in-memory-clusterer-base",
         ":status_macros",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/container:flat_hash_map",
