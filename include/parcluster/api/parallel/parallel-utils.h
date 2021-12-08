@@ -6,7 +6,7 @@
 
 #include <functional>
 
-#include "external/gbbs/pbbslib/utilities.h"
+#include "gbbs/bridge.h"
 
 namespace research_graph {
 namespace parallel {
@@ -19,7 +19,7 @@ static inline void ParDo(const std::function<void()>& left,
                          const std::function<void()>& right,
                          bool do_parallel = true) {
   if (do_parallel) {
-    pbbs::par_do(left, right);
+    parlay::par_do(left, right);
   } else {
     left();
     right();
@@ -33,7 +33,7 @@ static inline void ParDo(const std::function<void()>& left,
 static inline void ParallelForSplitting(size_t start, size_t end,
                                         size_t granularity,
                                         const std::function<void(size_t)>& f) {
-  pbbs::parallel_for(start, end, f, granularity);
+  parlay::parallel_for(start, end, f, granularity);
 }
 
 }  // namespace parallel

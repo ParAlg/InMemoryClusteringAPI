@@ -1,18 +1,14 @@
-#include "include/parcluster/api/parallel/parallel-graph-utils.h"
+#include "parallel-graph-utils.h"
 
 #include <cstdio>
 #include <string>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
-#include "external/gbbs/gbbs/gbbs.h"
-#include "external/gbbs/gbbs/graph_io.h"
-#include "external/gbbs/gbbs/macros.h"
-#include "external/gbbs/pbbslib/get_time.h"
-#include "external/gbbs/pbbslib/seq.h"
-#include "external/gbbs/pbbslib/sequence_ops.h"
-#include "external/gbbs/pbbslib/utilities.h"
-#include "include/parcluster/api/parallel/parallel-sequence-ops.h"
+#include "gbbs/gbbs.h"
+#include "gbbs/graph_io.h"
+#include "gbbs/macros.h"
+#include "parallel-sequence-ops.h"
 
 namespace research_graph {
 
@@ -35,7 +31,7 @@ std::vector<gbbs::uintE> GetOffsets(
   // start_index. The offset for each key after get_key(start_index - 1) to
   // get_key(start_index) is also start_index, because these keys do
   // not appear in get_key.
-  pbbs::parallel_for(0, num_filtered_mark_keys + 1, [&](std::size_t i) {
+  parlay::parallel_for(0, num_filtered_mark_keys + 1, [&](std::size_t i) {
     auto start_index = filtered_mark_keys[i];
     gbbs::uintE curr_key = start_index == num_keys ? n : get_key(start_index);
     gbbs::uintE prev_key = start_index == 0 ? 0 : get_key(start_index - 1) + 1;
@@ -61,10 +57,10 @@ RetrieveInterClusterEdges(
     const std::function<float(std::tuple<gbbs::uintE, gbbs::uintE, float>)>& scale_func) {
   // First, compute offsets on the original graph
   std::vector<gbbs::uintE> all_offsets(original_graph.n + 1, gbbs::uintE{0});
-  pbbs::parallel_for(0, original_graph.n, [&](std::size_t i) {
-    all_offsets[i] = original_graph.get_vertex(i).getOutDegree();
+  parlay::parallel_for(0, original_graph.n, [&](std::size_t i) {
+    all_offsets[i] = original_graph.get_vertex(i).out_degree();
   });
-  std::pair<pbbs::sequence<gbbs::uintE>, gbbs::uintE> all_offsets_scan =
+  std::pair<parlay::sequence<gbbs::uintE>, gbbs::uintE> all_offsets_scan =
       research_graph::parallel::ScanAdd(absl::Span<const gbbs::uintE>(
           all_offsets.data(), all_offsets.size()));
 
@@ -72,13 +68,13 @@ RetrieveInterClusterEdges(
   std::vector<std::tuple<gbbs::uintE, gbbs::uintE, float>> all_edges(
       original_graph.m, std::make_tuple(UINT_E_MAX, UINT_E_MAX, float{0}));
 
-  pbbs::parallel_for(0, original_graph.n, [&](std::size_t j) {
+  parlay::parallel_for(0, original_graph.n, [&](std::size_t j) {
     auto vtx = original_graph.get_vertex(j);
     gbbs::uintE i = 0;
     if (cluster_ids[j] != UINT_E_MAX) {
       auto map_f = [&](gbbs::uintE u, gbbs::uintE v, float weight) {
         if (is_valid_func(cluster_ids[v], cluster_ids[u]) &&
-            cluster_ids[v] != UINT_E_MAX 
+            cluster_ids[v] != UINT_E_MAX
             // TODO: they do this line, which doesn't double count self loops
             // but somehow if we do double count self loops, it makes us match
             // their modularity better?
@@ -92,7 +88,7 @@ RetrieveInterClusterEdges(
               std::make_tuple(cluster_ids[u], cluster_ids[v], scale_func(std::make_tuple(u, v, weight)));
         i++;
       };
-      vtx.mapOutNgh(j, map_f, false);
+      vtx.out_neighbors().map(map_f, false);
     }
   });
 
@@ -116,7 +112,7 @@ std::tuple<std::vector<double>, double, std::size_t> SeqComputeModularityConfig(
   std::vector<double> node_weights(graph->n);
   for (std::size_t i = 0; i < graph->n; i++) {
     auto vtx = graph->get_vertex(i);
-    auto wgh = vtx.getOutDegree();
+    auto wgh = vtx.out_degree();
     // TODO: this assumes unit edge weights
     total_edge_weight += wgh;
     node_weights[i] = wgh;
@@ -128,9 +124,9 @@ std::tuple<std::vector<double>, double, std::size_t> SeqComputeModularityConfig(
 std::tuple<std::vector<double>, double, std::size_t> ComputeModularityConfig(
   gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph, double resolution){
   std::vector<double> node_weights(graph->n);
-  pbbs::parallel_for(0, graph->n, [&](std::size_t i){
+  parlay::parallel_for(0, graph->n, [&](std::size_t i){
     auto vtx = graph->get_vertex(i);
-    auto wgh = vtx.getOutDegree();
+    auto wgh = vtx.out_degree();
     // TODO: this assumes unit edge weights
     node_weights[i] = wgh;
   });
@@ -186,7 +182,7 @@ OffsetsEdges ComputeInterClusterEdgesSort(
   // Separately save the first vertex in the corresponding edges, to compute
   // offsets
   std::vector<gbbs::uintE> edges_for_offsets(num_filtered_mark_edges);
-  pbbs::parallel_for(0, num_filtered_mark_edges, [&](std::size_t i) {
+  parlay::parallel_for(0, num_filtered_mark_edges, [&](std::size_t i) {
     // Combine edges from start_edge_index to end_edge_index
     gbbs::uintE start_edge_index = filtered_mark_edges[i];
     gbbs::uintE end_edge_index = filtered_mark_edges[i + 1];
@@ -225,7 +221,7 @@ std::vector<gbbs::uintE> FlattenClustering(
     const std::vector<gbbs::uintE>& cluster_ids,
     const std::vector<gbbs::uintE>& compressed_cluster_ids) {
   std::vector<gbbs::uintE> new_cluster_ids(cluster_ids.size());
-  pbbs::parallel_for(0, cluster_ids.size(), [&](std::size_t i) {
+  parlay::parallel_for(0, cluster_ids.size(), [&](std::size_t i) {
     new_cluster_ids[i] = (cluster_ids[i] == UINT_E_MAX)
                              ? UINT_E_MAX
                              : compressed_cluster_ids[cluster_ids[i]];

@@ -1,4 +1,4 @@
-#include "include/parcluster/api/in-memory-clusterer-base.h"
+#include "parcluster/api/in-memory-clusterer-base.h"
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"

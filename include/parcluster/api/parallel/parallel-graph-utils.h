@@ -3,13 +3,11 @@
 
 #include <cstdio>
 
-#include "external/gbbs/gbbs/gbbs.h"
-#include "external/gbbs/gbbs/graph_io.h"
-#include "external/gbbs/gbbs/macros.h"
-#include "external/gbbs/pbbslib/seq.h"
-#include "external/gbbs/pbbslib/sequence_ops.h"
-#include "external/gbbs/pbbslib/utilities.h"
-#include "include/parcluster/api/parallel/parallel-sequence-ops.h"
+#include "gbbs/gbbs.h"
+#include "gbbs/graph_io.h"
+#include "gbbs/macros.h"
+
+#include "parallel-sequence-ops.h"
 
 namespace research_graph {
 
@@ -62,9 +60,9 @@ MakeGbbsGraph(
       new gbbs::symmetric_vertex<WeightType>[num_vertices];
   auto edges = edges_pointer.release();
 
-  pbbs::parallel_for(0, num_vertices, [&](std::size_t i) {
+  parlay::parallel_for(0, num_vertices, [&](std::size_t i) {
     gbbs::vertex_data vertex_data{offsets[i], offsets[i + 1] - offsets[i]};
-    vertices[i] = gbbs::symmetric_vertex<WeightType>(edges, vertex_data);
+    vertices[i] = gbbs::symmetric_vertex<WeightType>(edges, vertex_data, i);
   });
 
   return std::make_unique<
@@ -87,7 +85,7 @@ SeqMakeGbbsGraph(
 
   for (std::size_t i = 0; i < num_vertices; i++) {
     gbbs::vertex_data vertex_data{offsets[i], offsets[i + 1] - offsets[i]};
-    vertices[i] = gbbs::symmetric_vertex<WeightType>(edges, vertex_data);
+    vertices[i] = gbbs::symmetric_vertex<WeightType>(edges, vertex_data, i);
   }
 
   return std::make_unique<

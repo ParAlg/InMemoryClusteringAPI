@@ -8,8 +8,8 @@
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "include/parcluster/api/config.pb.h"
-#include "external/gbbs/gbbs/gbbs.h"
+#include "parcluster/api/config.pb.h"
+#include "gbbs/gbbs.h"
 
 namespace research_graph {
 namespace in_memory {

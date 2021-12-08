@@ -7,10 +7,10 @@
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
-#include "include/parcluster/api/in-memory-clusterer-base.h"
-#include "external/gbbs/gbbs/gbbs.h"
-#include "external/gbbs/gbbs/graph.h"
-#include "external/gbbs/gbbs/macros.h"
+#include "in-memory-clusterer-base.h"
+#include "gbbs/gbbs.h"
+#include "gbbs/graph.h"
+#include "gbbs/macros.h"
 
 namespace research_graph {
 namespace in_memory {

@@ -1,12 +1,12 @@
-#include "include/parcluster/api/gbbs-graph.h"
+#include "parcluster/api/gbbs-graph.h"
 
 #include <algorithm>
 #include <memory>
 
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
-#include "include/parcluster/api/status_macros.h"
-#include "external/gbbs/gbbs/macros.h"
+#include "status_macros.h"
+#include "gbbs/macros.h"
 
 namespace research_graph {
 namespace in_memory {
@@ -39,22 +39,17 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
 }
 
 absl::Status GbbsGraph::FinishImport() {
-  auto degrees = gbbs::sequence<gbbs::uintE>(
-      nodes_.size(), [this](size_t i) { return nodes_[i].getOutDegree(); });
-  auto num_edges = pbbslib::reduce_add(degrees.slice());
+  auto degrees = parlay::sequence<gbbs::uintE>::from_function(
+      nodes_.size(), [this](size_t i) { return nodes_[i].out_degree(); });
+  auto num_edges = parlay::reduce(parlay::make_slice(degrees));
 
-  auto neighbors = gbbs::sequence<gbbs::uintE>(nodes_.size(), [this](size_t i) {
-    if (nodes_[i].getOutDegree() == 0) return gbbs::uintE{0};
-    auto max_neighbor =
-        std::max_element(nodes_[i].getOutNeighbors(),
-                         nodes_[i].getOutNeighbors() + nodes_[i].getOutDegree(),
-                         [](const std::tuple<gbbs::uintE, float>& u,
-                            const std::tuple<gbbs::uintE, float>& v) {
-                           return std::get<0>(u) < std::get<0>(v);
-                         });
-    return std::get<0>(*max_neighbor);
+  auto neighbors = parlay::sequence<gbbs::uintE>::from_function(nodes_.size(), [this](size_t i) {
+    if (nodes_[i].out_degree() == 0) return gbbs::uintE{0};
+    auto map_f = [&] (const auto& u, const auto& v, const auto& wgh) { return v; };
+    auto max_neighbor = nodes_[i].out_neighbors().reduce(map_f, parlay::maxm<gbbs::uintE>());
+    return max_neighbor;
   });
-  auto max_node = pbbslib::reduce_max(neighbors.slice());
+  auto max_node = parlay::reduce_max(parlay::make_slice(neighbors));
   EnsureSize(max_node + 1);
 
   // The GBBS graph takes no ownership of nodes / edges
@@ -65,24 +60,27 @@ absl::Status GbbsGraph::FinishImport() {
   return absl::OkStatus();
 }
 
+// TODO: What about compressed graphs?
 gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* GbbsGraph::Graph()
     const {
   return graph_.get();
 }
 
+// TODO: What about compressed graphs?
 absl::Status CopyGraph(
     gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>& in_graph,
     InMemoryClusterer::Graph* out_graph) {
   for (gbbs::uintE id = 0; id < in_graph.n; id++) {
     InMemoryClusterer::AdjacencyList adjacency_list;
     adjacency_list.id = id;
-    const auto& neighbors = in_graph.get_vertex(id).getOutNeighbors();
+    //using edge_type = typename gbbs::symmetric_vertex<float>::edge_type;
+    //const auto& neighbors = (edge_type*)in_graph.get_vertex(id).out_neighbors();
     adjacency_list.outgoing_edges.reserve(
-        in_graph.get_vertex(id).getOutDegree());
-    for (size_t j = 0; j < in_graph.get_vertex(id).getOutDegree(); j++) {
-      adjacency_list.outgoing_edges.emplace_back(std::get<0>(neighbors[j]),
-                                                 std::get<1>(neighbors[j]));
-    }
+        in_graph.get_vertex(id).out_degree());
+    auto map_f = [&] (const auto& u, const auto& v, const auto& wgh) {
+      adjacency_list.outgoing_edges.emplace_back(v, wgh);
+    };
+    in_graph.get_vertex(id).out_neighbors().map(map_f, /* parallel = */ false);
     RETURN_IF_ERROR(out_graph->Import(std::move(adjacency_list)));
   }
   RETURN_IF_ERROR(out_graph->FinishImport());
