@@ -104,6 +104,30 @@ std::vector<gbbs::uintE> FlattenClustering(
     const std::vector<gbbs::uintE>& cluster_ids,
     const std::vector<gbbs::uintE>& compressed_cluster_ids);
 
+// Given new cluster ids in compressed_cluster_ids, remap the original
+// cluster ids. A cluster id of UINT_E_MAX indicates that the vertex
+// has already been placed into a finalized cluster, and this is
+// preserved in the remapping.
+template <class NodeId, class DenseClustering>
+inline std::vector<std::vector<NodeId>> DenseClusteringToNestedClustering(
+    const DenseClustering& clustering) {
+  std::vector<std::vector<NodeId>> output;
+  // Should switch to using parlay::sequences soon (TODO(laxmand)).
+  auto pairs = parlay::sequence<std::pair<NodeId, NodeId>>::from_function(clustering.size(), [&] (NodeId i) {
+    return std::make_pair(clustering[i], i);
+  });
+  parlay::sort_inplace(parlay::make_slice(pairs));
+  for (long i=0; i<pairs.size(); i++) {
+    auto& cluster_i = pairs[i].first;
+    if (i == 0 || cluster_i != pairs[i-1].first) {
+      output.emplace_back(std::vector<NodeId>{pairs[i].second});
+    } else {
+      output[output.size()-1].emplace_back(pairs[i].second);
+    }
+  }
+  return output;
+}
+
 
 // Holds a GBBS graph and a corresponding node weights
 template <typename NodeWeightType>
