@@ -29,7 +29,7 @@ class InMemoryMetricClusterer {
   // Note that the same clustering may have multiple representations, and the
   // function may return any of them.
   virtual absl::StatusOr<std::vector<int64_t>> Cluster(
-      absl::Span<DataPoint> datapoints,
+      absl::Span<const DataPoint> datapoints,
       const MetricClustererConfig& config) const = 0;
 };
 
