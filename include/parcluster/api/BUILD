@@ -28,6 +28,22 @@ cc_library(
 )
 
 cc_library(
+    name = "in-memory-metric-clusterer-base",
+    srcs = ["in-memory-metric-clusterer-base.cc"],
+    hdrs = ["in-memory-metric-clusterer-base.h"],
+    deps = [
+        ":config_cc_proto",
+        ":datapoint",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@gbbs//gbbs",
+    ],
+)
+
+cc_library(
     name = "status_macros",
     hdrs = ["status_macros.h"],
     deps = [
@@ -51,5 +67,14 @@ cc_library(
         "@gbbs//gbbs",
         "@gbbs//gbbs:graph",
         "@gbbs//gbbs:macros",
+    ],
+)
+
+cc_library(
+    name = "datapoint",
+    hdrs = ["datapoint.h"],
+    deps = [
+        "@com_google_absl//absl/base",
+        "@gbbs//gbbs",
     ],
 )

@@ -20,27 +20,7 @@ namespace in_memory {
 // be clustered using a given set of parameters.
 class InMemoryMetricClusterer {
  public:
-  // This is a basic interface for storing datapoints.
-  class DataPoints {
-   public:
-    std::vector<DataPoint> points_;
-
-    ~DataPoints() {}
-
-    // Adds a datapoint to the set of points.
-    //
-    // AddPoint must be called at most once per point.
-    //
-    // IMPLEMENTATIONS MUST ALLOW CONCURRENT CALLS TO AddPoint()!
-    absl::Status AddPoint(DataPoint point);
-
-    absl::Status StartImport();
-  };
-
   virtual ~InMemoryMetricClusterer() {}
-
-  // Accessor to the maintained graph. Use it to build the graph.
-  virtual DataPoints* MutableDataPoints() = 0;
 
   // Clusters the currently maintained set of datapoints using the given set of
   // parameters.
@@ -48,7 +28,8 @@ class InMemoryMetricClusterer {
   // given datapoints.
   // Note that the same clustering may have multiple representations, and the
   // function may return any of them.
-  virtual absl::StatusOr<std::vector<int>> Cluster(
+  virtual absl::StatusOr<std::vector<int64_t>> Cluster(
+      absl::Span<DataPoint> datapoints,
       const MetricClustererConfig& config) const = 0;
 };
 

@@ -6,13 +6,5 @@
 namespace research_graph {
 namespace in_memory {
 
-absl::Status InMemoryMetricClusterer::DataPoints::StartImport() {
-  return absl::OkStatus();
-}
-
-absl::Status InMemoryMetricClusterer::DataPoints::AddPoint(DataPoint point) {
-  return absl::OkStatus();
-}
-
 }  // namespace in_memory
 }  // namespace research_graph
