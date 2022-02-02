@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "external/gbbs/gbbs/gbbs.h"
+#include "gbbs/gbbs.h"
 
 namespace research_graph {
 namespace in_memory {
