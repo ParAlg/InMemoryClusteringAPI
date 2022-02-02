@@ -209,7 +209,8 @@ message ClustererConfig {
 // Config for InMemoryMetricClusterer subclasses. When adding a new subclass:
 //  a) add a new proto definition to this file,
 //  b) add this proto to the config oneof in MetricClustererConfig.
-message MetricClustererConfig{
+message MetricClustererConfig {
   oneof config {
+    bytes parameter_string = 1;
   }
 }
