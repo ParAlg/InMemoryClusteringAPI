@@ -206,11 +206,22 @@ message ClustererConfig {
   }
 }
 
+message HACClustererConfig {
+  enum LinkageMethod {
+    COMPLETE = 0;
+    AVERAGE = 1;
+    WARD = 2;
+  }
+
+  optional LinkageMethod linkage_method = 1 [default = COMPLETE];
+}
+
 // Config for InMemoryMetricClusterer subclasses. When adding a new subclass:
 //  a) add a new proto definition to this file,
 //  b) add this proto to the config oneof in MetricClustererConfig.
 message MetricClustererConfig {
   oneof config {
     bytes parameter_string = 1;
+    HACClustererConfig  hac_clusterer_config = 2;
   }
 }
