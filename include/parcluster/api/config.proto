@@ -212,5 +212,11 @@ message ClustererConfig {
 message MetricClustererConfig {
   oneof config {
     bytes parameter_string = 1;
+    MetricDBSCANClustererConfig metric_dbscan_clusterer_config = 2;
   }
+}
+
+message MetricDBSCANClustererConfig {
+  required double epsilon = 1;
+  required int64 min_pts = 10;
 }
