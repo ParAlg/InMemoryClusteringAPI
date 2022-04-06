@@ -35,7 +35,7 @@ class InMemoryClusterer {
       std::vector<std::pair<NodeId, double>> outgoing_edges;
     };
 
-    std::unique_ptr<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>
+    std::shared_ptr<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>
       graph_;
 
     virtual ~Graph() = default;
