@@ -218,17 +218,15 @@ message HACClustererConfig {
     WARD = 2;
   }
 
-  optional LinkageMethod linkage_method = 1 [default = COMPLETE];
-}
-
-message HACClustererConfig {
-  enum LinkageMethod {
-    COMPLETE = 0;
-    AVERAGE = 1;
-    WARD = 2;
+  enum Distance {
+    EUCLIDEAN = 0;
+    EUCLIDEAN_SQ = 1;
   }
 
   optional LinkageMethod linkage_method = 1 [default = COMPLETE];
+  optional Distance      distance       = 2 [default = EUCLIDEAN];
+  optional string        output_dendro  = 3 [default = ""];
+
 }
 
 // Config for InMemoryMetricClusterer subclasses. When adding a new subclass:
