@@ -33,6 +33,8 @@ class GbbsGraph : public InMemoryClusterer::Graph {
   gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* Graph() const;
 
   absl::Status SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph);
+  std::shared_ptr<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>
+      graph_;
 
  private:
   // Ensures that the graph has the given number of nodes, by adding new nodes
@@ -41,8 +43,6 @@ class GbbsGraph : public InMemoryClusterer::Graph {
   absl::Mutex mutex_;
   std::vector<gbbs::symmetric_vertex<float>> nodes_;
   std::vector<std::unique_ptr<std::tuple<gbbs::uintE, float>[]>> edges_;
-  std::shared_ptr<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>
-      graph_;
 };
 
 // Calls out_graph->Import() for each node in in_graph.
