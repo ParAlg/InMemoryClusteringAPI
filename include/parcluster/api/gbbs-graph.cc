@@ -55,7 +55,7 @@ absl::Status GbbsGraph::FinishImport() {
   // The GBBS graph takes no ownership of nodes / edges
   auto g = gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>(
       nodes_.size(), num_edges, nodes_.data(), []() {});  // noop deletion_fn
-  graph_ = absl::make_shared<
+  graph_ = std::make_shared<
       gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>(g);
   return absl::OkStatus();
 }
@@ -67,7 +67,7 @@ gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* GbbsGraph::Graph()
 }
 
 absl::Status GbbsGraph::SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph) {
-  graph_ = absl::make_shared<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>(*graph);
+  graph_ = std::make_shared<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>(*graph);
   return absl::OkStatus();
 }
 
