@@ -32,7 +32,7 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
   EnsureSize(adjacency_list.id + 1);
   nodes_[adjacency_list.id].degree = outgoing_edges_size;
   nodes_[adjacency_list.id].neighbors = out_neighbors.get();
-  nodes_[adjacency_list.id].id = adjacency_list.id];
+  nodes_[adjacency_list.id].id = adjacency_list.id;
   if (edges_.size() <= adjacency_list.id) edges_.resize(adjacency_list.id + 1);
   edges_[adjacency_list.id] = std::move(out_neighbors);
 
