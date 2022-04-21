@@ -66,7 +66,7 @@ gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* GbbsGraph::Graph()
   return graph_.get();
 }
 
-absl::Status SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph) const {
+absl::Status GbbsGraph::SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph) const {
   graph_ = std::make_shared<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>(graph);
   return absl::OkStatus();
 }
