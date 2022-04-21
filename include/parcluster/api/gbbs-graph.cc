@@ -17,7 +17,7 @@ void GbbsGraph::EnsureSize(NodeId id) {
 
 // TODO(jeshi,laxmand): should adjacency_list be a const&?
 absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
-  assert(adjacency_list.id != -1);
+  std::cout << "ID: " << adjacency_list.id << std::endl;
   using GbbsEdge = std::tuple<gbbs::uintE, float>;
   // TODO(jeshi): Parallelize further by only taking the mutex when
   // nodes_ and edges_ need to double in size, instead of every time
