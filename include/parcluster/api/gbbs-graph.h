@@ -32,7 +32,7 @@ class GbbsGraph : public InMemoryClusterer::Graph {
 
   gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* Graph() const;
 
-  absl::Status SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph) const;
+  absl::Status SetGraph(gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* graph);
 
  private:
   // Ensures that the graph has the given number of nodes, by adding new nodes
