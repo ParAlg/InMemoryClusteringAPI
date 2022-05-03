@@ -41,6 +41,7 @@ class GbbsGraph : public InMemoryClusterer::Graph {
   std::vector<std::unique_ptr<std::tuple<gbbs::uintE, float>[]>> edges_;
   std::shared_ptr<gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>
       graph_;
+  int64_t num_nodes_ = 0;
 };
 
 // Calls out_graph->Import() for each node in in_graph.

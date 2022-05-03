@@ -15,6 +15,11 @@ void GbbsGraph::EnsureSize(NodeId id) {
   if (nodes_.size() < id) nodes_.resize(id, gbbs::symmetric_vertex<float>());
 }
 
+absl::Status PrepareImport(int64_t num_nodes) {
+  num_nodes_ = num_nodes;
+  return absl::OkStatus();
+}
+
 // TODO(jeshi,laxmand): should adjacency_list be a const&?
 absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
   using GbbsEdge = std::tuple<gbbs::uintE, float>;
@@ -28,7 +33,9 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
         static_cast<gbbs::uintE>(adjacency_list.outgoing_edges[i].first),
         adjacency_list.outgoing_edges[i].second);
   });
-  absl::MutexLock lock(&mutex_);
+  if (num_nodes_ == 0) {
+    absl::MutexLock lock(&mutex_);
+  }
   EnsureSize(adjacency_list.id + 1);
   nodes_[adjacency_list.id].degree = outgoing_edges_size;
   nodes_[adjacency_list.id].neighbors = out_neighbors.get();
