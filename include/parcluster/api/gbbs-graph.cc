@@ -15,7 +15,7 @@ void GbbsGraph::EnsureSize(NodeId id) {
   if (nodes_.size() < id) nodes_.resize(id, gbbs::symmetric_vertex<float>());
 }
 
-absl::Status PrepareImport(int64_t num_nodes) {
+absl::Status GbbsGraph::PrepareImport(int64_t num_nodes) {
   num_nodes_ = num_nodes;
   return absl::OkStatus();
 }
