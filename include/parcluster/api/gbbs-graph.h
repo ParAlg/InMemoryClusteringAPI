@@ -26,7 +26,7 @@ class GbbsGraph : public InMemoryClusterer::Graph {
  public:
   // Stores the node and edge information in nodes_ and edges_
   absl::Status Import(AdjacencyList adjacency_list) override;
-  absl::Status PrepareImport(int64_t num_nodes);
+  absl::Status PrepareImport(int64_t num_nodes) override;
   // Constructs graph_ using nodes_ and edges_
   absl::Status FinishImport() override;
 

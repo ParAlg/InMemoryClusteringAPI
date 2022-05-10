@@ -46,7 +46,7 @@ class InMemoryClusterer {
     //
     // IMPLEMENTATIONS MUST ALLOW CONCURRENT CALLS TO Import()!
     virtual absl::Status Import(AdjacencyList adjacency_list) = 0;
-
+    virtual absl::Status PrepareImport(int64_t num_nodes) = 0;
     virtual absl::Status FinishImport();
   };
 
