@@ -13,6 +13,7 @@ namespace in_memory {
 
 void GbbsGraph::EnsureSize(NodeId id) {
   if (nodes_.size() < id) nodes_.resize(id, gbbs::symmetric_vertex<float>());
+  if (edges_.size() <= adjacency_list.id) edges_.resize(adjacency_list.id + 1);
 }
 
 absl::Status GbbsGraph::PrepareImport(int64_t num_nodes) {
@@ -33,14 +34,12 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
         static_cast<gbbs::uintE>(adjacency_list.outgoing_edges[i].first),
         adjacency_list.outgoing_edges[i].second);
   });
-  if (num_nodes_ == 0) {
-    absl::MutexLock lock(&mutex_);
-  }
+  // If number of nodes has not been previously set, we must take the mutex
+  if (num_nodes_ == 0) absl::MutexLock lock(&mutex_);
   EnsureSize(adjacency_list.id + 1);
   nodes_[adjacency_list.id].degree = outgoing_edges_size;
   nodes_[adjacency_list.id].neighbors = out_neighbors.get();
   nodes_[adjacency_list.id].id = adjacency_list.id;
-  if (edges_.size() <= adjacency_list.id) edges_.resize(adjacency_list.id + 1);
   edges_[adjacency_list.id] = std::move(out_neighbors);
 
   return absl::OkStatus();
@@ -58,11 +57,13 @@ absl::Status GbbsGraph::FinishImport() {
     return max_neighbor;
   });
   auto max_node = parlay::reduce_max(parlay::make_slice(neighbors));
+
   EnsureSize(max_node + 1);
+  num_nodes_ = nodes_.size();
 
   // The GBBS graph takes no ownership of nodes / edges
   auto g = gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>(
-      nodes_.size(), num_edges, nodes_.data(), []() {});  // noop deletion_fn
+      num_nodes_, num_edges, nodes_.data(), []() {});  // noop deletion_fn
   graph_ = std::make_shared<
       gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>>(g);
   return absl::OkStatus();
