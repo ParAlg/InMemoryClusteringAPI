@@ -12,12 +12,14 @@ namespace research_graph {
 namespace in_memory {
 
 void GbbsGraph::EnsureSize(NodeId id) {
-  if (nodes_.size() < id) nodes_.resize(id, gbbs::symmetric_vertex<float>());
-  if (edges_.size() <= adjacency_list.id) edges_.resize(adjacency_list.id + 1);
+  if (nodes_.size() < id) nodes_.resize(id + 1, gbbs::symmetric_vertex<float>());
+  if (edges_.size() <= id) edges_.resize(id + 1);
 }
 
 absl::Status GbbsGraph::PrepareImport(int64_t num_nodes) {
   num_nodes_ = num_nodes;
+  nodes_.resize(num_nodes_, gbbs::symmetric_vertex<float>());
+  edges_.resize(num_nodes_);
   return absl::OkStatus();
 }
 
@@ -36,7 +38,7 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
   });
   // If number of nodes has not been previously set, we must take the mutex
   if (num_nodes_ == 0) absl::MutexLock lock(&mutex_);
-  EnsureSize(adjacency_list.id + 1);
+  EnsureSize(adjacency_list.id);
   nodes_[adjacency_list.id].degree = outgoing_edges_size;
   nodes_[adjacency_list.id].neighbors = out_neighbors.get();
   nodes_[adjacency_list.id].id = adjacency_list.id;
@@ -58,7 +60,7 @@ absl::Status GbbsGraph::FinishImport() {
   });
   auto max_node = parlay::reduce_max(parlay::make_slice(neighbors));
 
-  EnsureSize(max_node + 1);
+  EnsureSize(max_node);
   num_nodes_ = nodes_.size();
 
   // The GBBS graph takes no ownership of nodes / edges
