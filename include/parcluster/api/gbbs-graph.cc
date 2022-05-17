@@ -12,7 +12,7 @@ namespace research_graph {
 namespace in_memory {
 
 void GbbsGraph::EnsureSize(NodeId id) {
-  if (nodes_.size() < id) nodes_.resize(id + 1, gbbs::symmetric_vertex<float>());
+  if (nodes_.size() <= id) nodes_.resize(id + 1, gbbs::symmetric_vertex<float>());
   if (edges_.size() <= id) edges_.resize(id + 1);
 }
 
@@ -37,8 +37,10 @@ absl::Status GbbsGraph::Import(AdjacencyList adjacency_list) {
         adjacency_list.outgoing_edges[i].second);
   });
   // If number of nodes has not been previously set, we must take the mutex
-  if (num_nodes_ == 0) absl::MutexLock lock(&mutex_);
-  EnsureSize(adjacency_list.id);
+  if (num_nodes_ == 0) {
+    absl::MutexLock lock(&mutex_);
+    EnsureSize(adjacency_list.id);
+  }
   nodes_[adjacency_list.id].degree = outgoing_edges_size;
   nodes_[adjacency_list.id].neighbors = out_neighbors.get();
   nodes_[adjacency_list.id].id = adjacency_list.id;
