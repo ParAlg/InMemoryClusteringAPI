@@ -2,9 +2,7 @@ syntax = "proto2";
 
 package research_graph.in_memory;
 
-// Special prototype called "any_proto" (lookup)
-// - each algorithm would know what to expect. (expect that the proto is my
-// config proto, otherwise fail).
+import "google/protobuf/any.proto";
 
 message DynamicWeightThresholdConfig {
   enum WeightDecayFunction {
@@ -208,6 +206,7 @@ message ClustererConfig {
     AffinityClustererConfig affinity_clusterer_config = 4;
     CorrelationClustererConfig correlation_clusterer_config = 7;
     KCoreClustererConfig kcore_clusterer_config = 8;
+    google.protobuf.Any any_config = 9;
   }
 }
 

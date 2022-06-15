@@ -5,6 +5,7 @@ proto_library(
     srcs = [
         "config.proto",
     ],
+    deps = ["@com_google_protobuf//:any_proto"],
 )
 
 cc_proto_library(
