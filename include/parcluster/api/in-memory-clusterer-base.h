@@ -27,6 +27,10 @@ class InMemoryClusterer {
   class Graph {
    public:
     using NodeId = gbbs::uintE;
+    // TODO(jeshi): This is a temporary dendrogram object that only stores the
+    // parent (and not associated data such as similarity). It should be
+    // replaced with the internal dendrogram object.
+    using Dendrogram = std::vector<gbbs::uintE>;
 
     // Represents a weighted node with weighted outgoing edges.
     struct AdjacencyList {
@@ -71,6 +75,13 @@ class InMemoryClusterer {
   // function may return any of them.
   virtual absl::StatusOr<Clustering> Cluster(
       const ClustererConfig& config) const = 0;
+  
+  // Returns a family of clusterings represented by a dendrogram in the parent-
+  // array format. Note that the default implementation returns an error status,
+  // so callers should ensure that the Clusterer being used implements this
+  // method.
+  virtual absl::StatusOr<Dendrogram> HierarchicalCluster(
+      const ClustererConfig& config) const;
 
   // Refines a list of clusters and redirects the given pointer to new clusters.
   // This function is useful for methods that can refine / operate on an

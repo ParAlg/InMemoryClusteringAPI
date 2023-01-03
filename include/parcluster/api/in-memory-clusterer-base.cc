@@ -20,5 +20,11 @@ std::string InMemoryClusterer::StringId(NodeId id) const {
   }
 }
 
+absl::StatusOr<InMemoryClusterer::Dendrogram>
+InMemoryClusterer::HierarchicalCluster (
+    const ClustererConfig& config) const {
+  return absl::UnimplementedError("HierarchicalCluster not implemented.");
+}
+
 }  // namespace in_memory
 }  // namespace research_graph
