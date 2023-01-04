@@ -191,10 +191,6 @@ message LouvainConfig {
   optional int64 num_inner_iterations = 2;
 }
 
-message KCoreClustererConfig {
-  optional int32 threshold = 1;
-}
-
 // Config for InMemoryClusterer subclasses. When adding a new subclass:
 //  a) add a new proto definition to this file,
 //  b) add this proto to the config oneof in ClustererConfig.
@@ -205,7 +201,6 @@ message ClustererConfig {
     bytes parameter_string = 1;
     AffinityClustererConfig affinity_clusterer_config = 4;
     CorrelationClustererConfig correlation_clusterer_config = 7;
-    KCoreClustererConfig kcore_clusterer_config = 8;
     google.protobuf.Any any_config = 9;
   }
 }
