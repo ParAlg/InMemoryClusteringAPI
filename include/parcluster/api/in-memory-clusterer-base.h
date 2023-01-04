@@ -27,10 +27,6 @@ class InMemoryClusterer {
   class Graph {
    public:
     using NodeId = gbbs::uintE;
-    // TODO(jeshi): This is a temporary dendrogram object that only stores the
-    // parent (and not associated data such as similarity). It should be
-    // replaced with the internal dendrogram object.
-    using Dendrogram = std::vector<gbbs::uintE>;
 
     // Represents a weighted node with weighted outgoing edges.
     struct AdjacencyList {
@@ -56,6 +52,11 @@ class InMemoryClusterer {
 
   using NodeId = Graph::NodeId;
   using AdjacencyList = Graph::AdjacencyList;
+
+  // TODO(jeshi): This is a temporary dendrogram object that only stores the
+  // parent (and not associated data such as similarity). It should be
+  // replaced with the internal dendrogram object.
+  using Dendrogram = std::vector<gbbs::uintE>;
 
   // Represents clustering: each element of the vector contains the set of
   // NodeIds in one cluster. We call a clustering non-overlapping if the
