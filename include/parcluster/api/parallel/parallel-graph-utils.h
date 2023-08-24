@@ -111,20 +111,24 @@ std::vector<gbbs::uintE> FlattenClustering(
 template <class NodeId, class DenseClustering>
 inline std::vector<std::vector<NodeId>> DenseClusteringToNestedClustering(
     const DenseClustering& clustering) {
-  std::vector<std::vector<NodeId>> output;
-  // Should switch to using parlay::sequences soon (TODO(laxmand)).
   auto pairs = parlay::sequence<std::pair<NodeId, NodeId>>::from_function(clustering.size(), [&] (NodeId i) {
     return std::make_pair(clustering[i], i);
   });
-  parlay::sort_inplace(parlay::make_slice(pairs));
-  for (long i=0; i<pairs.size(); i++) {
-    auto& cluster_i = pairs[i].first;
-    if (i == 0 || cluster_i != pairs[i-1].first) {
-      output.emplace_back(std::vector<NodeId>{pairs[i].second});
-    } else {
-      output[output.size()-1].emplace_back(pairs[i].second);
-    }
-  }
+  // parlay::sort_inplace(parlay::make_slice(pairs));
+  // for (long i=0; i<pairs.size(); i++) {
+  //   auto& cluster_i = pairs[i].first;
+  //   if (i == 0 || cluster_i != pairs[i-1].first) {
+  //     output.emplace_back(std::vector<NodeId>{pairs[i].second});
+  //   } else {
+  //     output[output.size()-1].emplace_back(pairs[i].second);
+  //   }
+  // }
+  auto grouped = parlay::group_by_key(pairs);
+  std::vector<std::vector<NodeId>> output(grouped.size());
+  parlay::parallel_for(0, grouped.size(), [&](size_t i){
+    output[i] = std::vector<NodeId>(grouped[i].second.begin(), grouped[i].second.end());
+  });
+
   return output;
 }
 
