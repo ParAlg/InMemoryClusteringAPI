@@ -104,10 +104,7 @@ std::vector<gbbs::uintE> FlattenClustering(
     const std::vector<gbbs::uintE>& cluster_ids,
     const std::vector<gbbs::uintE>& compressed_cluster_ids);
 
-// Given new cluster ids in compressed_cluster_ids, remap the original
-// cluster ids. A cluster id of UINT_E_MAX indicates that the vertex
-// has already been placed into a finalized cluster, and this is
-// preserved in the remapping.
+// Map DenseClustering type to nested vector type. Each vector in nested vector is a community.
 template <class NodeId, class DenseClustering>
 inline std::vector<std::vector<NodeId>> DenseClusteringToNestedClustering(
     const DenseClustering& clustering) {
