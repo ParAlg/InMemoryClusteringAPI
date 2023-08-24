@@ -29,6 +29,7 @@ class GbbsGraph : public InMemoryClusterer::Graph {
   absl::Status PrepareImport(int64_t num_nodes) override;
   // Constructs graph_ using nodes_ and edges_
   absl::Status FinishImport() override;
+  NodeId Degree(NodeId i) override {return graph_->get_vertex(i).out_degree();}
 
   gbbs::symmetric_ptr_graph<gbbs::symmetric_vertex, float>* Graph() const;
 
