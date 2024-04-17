@@ -48,7 +48,7 @@ class InMemoryClusterer {
     virtual absl::Status Import(AdjacencyList adjacency_list) = 0;
     virtual absl::Status PrepareImport(int64_t num_nodes) = 0;
     virtual absl::Status FinishImport();
-    virtual NodeId Degree(NodeId i) = 0;
+    virtual NodeId Degree(NodeId i) const = 0;
   };
 
   using NodeId = Graph::NodeId;
