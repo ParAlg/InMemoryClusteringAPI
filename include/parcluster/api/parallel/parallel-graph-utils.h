@@ -123,7 +123,11 @@ inline std::vector<std::vector<NodeId>> DenseClusteringToNestedClustering(
   auto grouped = parlay::group_by_key(pairs);
   std::vector<std::vector<NodeId>> output(grouped.size());
   parlay::parallel_for(0, grouped.size(), [&](size_t i){
-    output[i] = std::vector<NodeId>(grouped[i].second.begin(), grouped[i].second.end());
+    output[i].resize(grouped[i].second.size());
+    parlay::parallel_for(0, grouped[i].second.size(), [&](size_t j){
+      output[i][j] = grouped[i].second[j];
+    });
+    // output[i] = std::vector<NodeId>(grouped[i].second.begin(), grouped[i].second.end());
   });
 
   return output;
